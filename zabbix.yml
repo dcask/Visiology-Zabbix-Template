@@ -1,0 +1,30 @@
+version: "3.8"
+x-deploy: &deploy
+  deploy:
+    placement:
+      max_replicas_per_node: 1
+      constraints:
+        - "node.labels.platform==true"
+
+services:
+  zabbix:
+    image: zabbix/zabbix-agent2:latest
+    user: 0:0
+    ports:
+      - mode: host
+        protocol: tcp
+        published: 10050
+        target: 10050
+    environment:
+      - ZBX_HOSTNAME=my_name
+      - ZBX_SERVER_HOST=x.x.x.x/32
+      - ZBX_ACTIVESERVERS=x.x.x.x:8383
+    tty: true
+    labels:
+      component: "zabbix"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /docker-volume:/docker-volume:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/lib/docker/volumes/visiology_hardwareid/_data/key:/var/lib/docker/volumes/visiology_hardwareid/_data/key:ro
+    << : *deploy

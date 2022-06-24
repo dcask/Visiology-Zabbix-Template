@@ -1,0 +1,1 @@
+docker stack deploy -c zabbix.yml vi_monitor

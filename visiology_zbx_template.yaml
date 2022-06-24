@@ -1,0 +1,2444 @@
+zabbix_export:
+  version: '6.0'
+  date: '2022-06-22T10:36:16Z'
+  groups:
+    -
+      uuid: 5d309c21bba14eb2869b75a4467b6a26
+      name: Visiology
+    -
+      uuid: 5e5e90035d9947f9bfe1c68a64ea7804
+      name: 'Visiology platform'
+  templates:
+    -
+      uuid: 49f1c66386cf45cfb38cba329956d9c5
+      template: 'Visiology Monitoring Template'
+      name: 'Visiology Monitoring Template'
+      description: |
+        Get  metrics from plugin for zabbix-agent2.
+        
+        You can discuss this template or leave feedback on our forum https://www.zabbix.com/forum/zabbix-suggestions-and-feedback/435429-discussion-thread-for-official-zabbix-template-docker
+        
+        Template tooling version used: 0.41
+      groups:
+        -
+          name: Visiology
+        -
+          name: 'Visiology platform'
+      items:
+        -
+          uuid: 2c2e3c0201ae47c9807a010060f4c022
+          name: 'Zabbix agent ping'
+          type: ZABBIX_ACTIVE
+          key: agent.ping
+          delay: 20s
+          history: 7d
+          tags:
+            -
+              tag: component
+              value: raw
+          triggers:
+            -
+              uuid: 46a18041fcef42689130f6ee39deaa5e
+              expression: 'nodata(/Visiology Monitoring Template/agent.ping,35s)=1'
+              name: 'Zabbix agent is down'
+              priority: HIGH
+              manual_close: 'YES'
+              tags:
+                -
+                  tag: scope
+                  value: availability
+        -
+          uuid: 98e5a63795b74c9a82f8761e302984ec
+          name: 'Host get containers'
+          type: ZABBIX_ACTIVE
+          key: docker.containers
+          delay: 1h
+          history: '0'
+          trends: '0'
+          value_type: TEXT
+          tags:
+            -
+              tag: component
+              value: raw
+        -
+          uuid: 28f7e386ca014b888ae1c4c03150f1bd
+          name: 'Containers running'
+          type: DEPENDENT
+          key: docker.containers.running
+          delay: '0'
+          history: 7d
+          description: 'Total number of containers running on this host'
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.ContainersRunning
+          master_item:
+            key: docker.info
+          tags:
+            -
+              tag: component
+              value: containers
+        -
+          uuid: d508441450c0462ca23598813b96f2ca
+          name: 'Containers total'
+          type: DEPENDENT
+          key: docker.containers.total
+          delay: '0'
+          history: 7d
+          description: 'Total number of containers on this host'
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.Containers
+          master_item:
+            key: docker.info
+          tags:
+            -
+              tag: component
+              value: containers
+        -
+          uuid: 3b264e41af0d461b8d3a286b9709c168
+          name: 'Containers size'
+          type: DEPENDENT
+          key: docker.containers_size
+          delay: '0'
+          history: 7d
+          units: B
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - '$.Containers[*].SizeRw.sum()'
+          master_item:
+            key: docker.data_usage
+          tags:
+            -
+              tag: component
+              value: containers
+            -
+              tag: component
+              value: storage
+        -
+          uuid: 31f4793b9c65453686a001832f0f5f79
+          name: 'Host get data_usage'
+          type: ZABBIX_ACTIVE
+          key: docker.data_usage
+          delay: 1h
+          history: '0'
+          trends: '0'
+          value_type: TEXT
+          tags:
+            -
+              tag: component
+              value: raw
+        -
+          uuid: cf9ee7c7524d40ff809ab970d2bca98d
+          name: 'Host get images'
+          type: ZABBIX_ACTIVE
+          key: docker.images
+          delay: 1h
+          history: '0'
+          trends: '0'
+          value_type: TEXT
+          tags:
+            -
+              tag: component
+              value: raw
+        -
+          uuid: ac4e768375054dacb2ddd91f0c3ec587
+          name: 'Images available'
+          type: DEPENDENT
+          key: docker.images.top_level
+          delay: '0'
+          history: 7d
+          description: 'Number of top-level images'
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.length()
+          master_item:
+            key: docker.images
+          tags:
+            -
+              tag: component
+              value: images
+        -
+          uuid: 45714ed08e6e42d29dbd545346932b9b
+          name: 'Images total'
+          type: DEPENDENT
+          key: docker.images.total
+          delay: '0'
+          history: 7d
+          description: 'Number of images with intermediate image layers'
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.Images
+          master_item:
+            key: docker.info
+          tags:
+            -
+              tag: component
+              value: images
+        -
+          uuid: 8f2391fe13c7487fb2707c26dba4cbfb
+          name: 'Images size'
+          type: DEPENDENT
+          key: docker.images_size
+          delay: '0'
+          history: 7d
+          units: B
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - '$.Images[*].Size.sum()'
+          master_item:
+            key: docker.data_usage
+          tags:
+            -
+              tag: component
+              value: images
+            -
+              tag: component
+              value: storage
+        -
+          uuid: 50d0c082ac0e490ea39817f6be3eeec8
+          name: 'Get docker info'
+          type: ZABBIX_ACTIVE
+          key: docker.info
+          delay: 1h
+          history: '0'
+          trends: '0'
+          value_type: TEXT
+          tags:
+            -
+              tag: component
+              value: raw
+        -
+          uuid: d52801b94cd1449495c643dd86065af5
+          name: Hostname
+          type: DEPENDENT
+          key: docker.name
+          delay: '0'
+          history: 1h
+          trends: '0'
+          value_type: CHAR
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.Name
+          master_item:
+            key: docker.info
+          tags:
+            -
+              tag: component
+              value: system
+        -
+          uuid: ed23758ab9e34123924f51cc9f3df0df
+          name: 'Host OS'
+          type: DEPENDENT
+          key: docker.operating_system
+          delay: '0'
+          history: 7d
+          trends: '0'
+          value_type: CHAR
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.OperatingSystem
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          master_item:
+            key: docker.info
+          tags:
+            -
+              tag: component
+              value: os
+        -
+          uuid: bdcc686b74924f9d8307835b3324974b
+          name: 'Docker version'
+          type: DEPENDENT
+          key: docker.server_version
+          delay: '0'
+          history: 7d
+          trends: '0'
+          value_type: CHAR
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.ServerVersion
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          master_item:
+            key: docker.info
+          tags:
+            -
+              tag: component
+              value: application
+        -
+          uuid: e221513f280a4d29ac713314d0b7b876
+          name: 'Docker: Volumes size'
+          type: DEPENDENT
+          key: docker.volumes_size
+          delay: '0'
+          history: 7d
+          units: B
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - '$.Volumes[*].UsageData.Size.sum()'
+          master_item:
+            key: docker.data_usage
+          tags:
+            -
+              tag: component
+              value: storage
+        -
+          uuid: 3b52bafaeb574fc0b47d97942eaf5e2f
+          name: 'Setup host macro'
+          type: SCRIPT
+          key: install.macro
+          history: '0'
+          trends: '0'
+          value_type: TEXT
+          params: |
+            //try {
+            	var req = new CurlHttpRequest(),
+            		params = JSON.parse(value)
+            		payload ={
+            			"jsonrpc":"2.0",
+            			"method":"user.login",
+            			"params":{
+            				"user":"{$ADMIN.USER}",
+            				"password":"{$ADMIN.PASSWORD}"
+            				},
+            			"id":1,
+            			"auth":null
+            		},
+            		apiurl = '{$ZABBIX.HOST}'+'/api_jsonrpc.php',
+            		result;
+                    req.AddHeader('Content-Type: application/json');
+            	if ( '{$'+'HOST_ID'+'}' != '{$HOST_ID}' ){
+            		var token =  JSON.parse(req.Post(apiurl, JSON.stringify(payload)));
+            		payload = {
+            			"jsonrpc": "2.0",
+            			"method": "host.get",
+            			"params": {
+            				"output": ["hostid"],
+            				"filter": {
+            				   "host": params.hostname
+            				}
+            			},
+            			"auth": token.result,
+            			"id": 1
+            		}
+            		var host_id	= JSON.parse(req.Post(apiurl, JSON.stringify(payload))).result[0].hostid;
+            		payload= {
+            				"jsonrpc": "2.0",
+            				"method": "usermacro.create",
+            				"params": {
+            					"hostid": host_id,
+            					"macro": "{$"+"HOST_ID}",
+            					"value": '"'+host_id+'"'
+            				},
+            				"auth": token.result,
+            				"id": 1
+            		};
+            		
+            		var request= req.Post(apiurl, JSON.stringify(payload));
+            		payload.params.macro="{$"+"HOST_URL}"
+            		payload.params.value="";
+            		request = req.Post(apiurl, JSON.stringify(payload));
+            		result = JSON.stringify(request);
+            	}
+            //} catch (error) {
+            
+            //    result = error;
+            //}
+            return result;
+          parameters:
+            -
+              name: hostname
+              value: '{HOST.HOST}'
+          tags:
+            -
+              tag: template
+              value: installation
+        -
+          uuid: a8a17b092577483d9b29a2e1b3a85d20
+          name: 'ViQube loading error'
+          type: ZABBIX_ACTIVE
+          key: 'logrt.count[/docker-volume/viqube/log/viqube.log,".*Cannot\sload\sthe\ssnapshot.*",,10,skip]'
+          delay: 20s
+          history: 7d
+          tags:
+            -
+              tag: viqube
+              value: errors
+          triggers:
+            -
+              uuid: d06a647194d047ddaa7022ab17f920bb
+              expression: 'last(/Visiology Monitoring Template/logrt.count[/docker-volume/viqube/log/viqube.log,".*Cannot\sload\sthe\ssnapshot.*",,10,skip],#1)>0'
+              name: 'Can''t load the snapshop'
+              priority: HIGH
+        -
+          uuid: 6d8b367dbe3d4714a72921c467fbf9b3
+          name: 'ViQube saving error'
+          type: ZABBIX_ACTIVE
+          key: 'logrt.count[/docker-volume/viqube/log/viqube.log,".*Cannot\ssave\sthe\ssnapshot.*",,10,skip]'
+          delay: 20s
+          history: 7d
+          tags:
+            -
+              tag: viqube
+              value: errors
+          triggers:
+            -
+              uuid: df34f00e9ccf4aff9bbd1c2b65e36b74
+              expression: 'last(/Visiology Monitoring Template/logrt.count[/docker-volume/viqube/log/viqube.log,".*Cannot\ssave\sthe\ssnapshot.*",,10,skip],#1)>0'
+              name: 'Can''t save the snapshot'
+              priority: HIGH
+        -
+          uuid: ceccf1133bda4af48b2e0ea3e17043f4
+          name: 'ViQube snapshot start saving'
+          type: ZABBIX_ACTIVE
+          key: 'logrt.count[/docker-volume/viqube/log/viqube.log,".*POST\s/snapshots.*",,30,skip]'
+          delay: 20s
+          history: 7d
+          tags:
+            -
+              tag: viqube
+              value: snapshot
+        -
+          uuid: da6e7354cf1042fa826128deae4c0d43
+          name: 'ViQube snapshot loaded'
+          type: ZABBIX_ACTIVE
+          key: 'logrt.count[/docker-volume/viqube/log/viqube.log,".*was\ssuccessfully\sloaded.*",,10,skip]'
+          delay: 20s
+          history: 7d
+          tags:
+            -
+              tag: viqube
+              value: snapshot
+          triggers:
+            -
+              uuid: 92eff454b9ce49abaab8fe921e70a815
+              expression: 'last(/Visiology Monitoring Template/logrt.count[/docker-volume/viqube/log/viqube.log,".*was\ssuccessfully\sloaded.*",,10,skip],#1)>0'
+              name: 'Shapshot was loaded'
+              priority: INFO
+              dependencies:
+                -
+                  name: 'Zabbix agent is down'
+                  expression: 'nodata(/Visiology Monitoring Template/agent.ping,35s)=1'
+        -
+          uuid: 895192a90cf64622b4c3e420706a222f
+          name: 'ViQube snapshot saved'
+          type: ZABBIX_ACTIVE
+          key: 'logrt.count[/docker-volume/viqube/log/viqube.log,".*was\ssuccessfully\ssaved.*",,10,skip]'
+          delay: 20s
+          history: 7d
+          tags:
+            -
+              tag: viqube
+              value: snapshot
+          triggers:
+            -
+              uuid: 7bbcdde2513b43038e46a3b6721be9c3
+              expression: 'last(/Visiology Monitoring Template/logrt.count[/docker-volume/viqube/log/viqube.log,".*was\ssuccessfully\ssaved.*",,10,skip],#1)>0'
+              name: 'Shapshot was saved'
+              priority: INFO
+              dependencies:
+                -
+                  name: 'Zabbix agent is down'
+                  expression: 'nodata(/Visiology Monitoring Template/agent.ping,35s)=1'
+        -
+          uuid: 663560d1077f4fd39c3c4356926d0c0a
+          name: 'MongoDB log part'
+          type: ZABBIX_ACTIVE
+          key: 'log[/var/lib/docker/containers/{$LOG_VISIOLOGY_MONGODB}/{$LOG_VISIOLOGY_MONGODB}-json.log,,,100, skip]'
+          delay: 20s
+          history: '0'
+          trends: '0'
+          value_type: LOG
+          tags:
+            -
+              tag: platform
+              value: logs
+        -
+          uuid: b19cdcffac1349339a65a96b8303cddf
+          name: 'Proxy log part'
+          type: ZABBIX_ACTIVE
+          key: 'log[/var/lib/docker/containers/{$LOG_VISIOLOGY_PROXY}/{$LOG_VISIOLOGY_PROXY}-json.log,,,100, skip]'
+          delay: 20s
+          history: '0'
+          trends: '0'
+          value_type: LOG
+          tags:
+            -
+              tag: platform
+              value: logs
+        -
+          uuid: 800c46d311334a4280f6d05b99a20a57
+          name: 'Smart-forms log part'
+          type: ZABBIX_ACTIVE
+          key: 'log[/var/lib/docker/containers/{$LOG_VISIOLOGY_SMART_FORMS}/{$LOG_VISIOLOGY_SMART_FORMS}-json.log,,,200, skip]'
+          delay: 20s
+          history: '0'
+          trends: '0'
+          value_type: LOG
+          tags:
+            -
+              tag: platform
+              value: logs
+        -
+          uuid: 9216f726a6854742ace435096375607a
+          name: 'ViQube-admin log part'
+          type: ZABBIX_ACTIVE
+          key: 'log[/var/lib/docker/containers/{$LOG_VISIOLOGY_VIQUBE_ADMIN}/{$LOG_VISIOLOGY_VIQUBE_ADMIN}-json.log,".*Запрос.*",,100, skip]'
+          delay: 20s
+          history: '0'
+          trends: '0'
+          value_type: LOG
+          tags:
+            -
+              tag: platform
+              value: logs
+        -
+          uuid: 6e41c99fb14441cfa08d4075d70fd549
+          name: 'Smart-forms Postgres size'
+          type: ZABBIX_ACTIVE
+          key: 'pgsql.db.size[smart-forms-db:5432,postgres,Postgre9, DB]'
+          history: 7d
+          status: DISABLED
+        -
+          uuid: c0849608dcf6463384ac911668f7ee28
+          name: 'Proxy error'
+          type: DEPENDENT
+          key: proxy.error
+          delay: '0'
+          history: 7d
+          trends: '0'
+          value_type: TEXT
+          preprocessing:
+            -
+              type: REGEX
+              parameters:
+                - '.*ERROR.*'
+                - \0
+              error_handler: CUSTOM_VALUE
+              error_handler_params: ' '
+          master_item:
+            key: 'log[/var/lib/docker/containers/{$LOG_VISIOLOGY_PROXY}/{$LOG_VISIOLOGY_PROXY}-json.log,,,100, skip]'
+          tags:
+            -
+              tag: proxy
+              value: errors
+          triggers:
+            -
+              uuid: 32c4e5fca81d434fbf027479d1ac0872
+              expression: 'length(last(/Visiology Monitoring Template/proxy.error,#1))>5'
+              name: 'Proxy Error Has Occurred'
+              priority: AVERAGE
+              dependencies:
+                -
+                  name: 'Zabbix agent is down'
+                  expression: 'nodata(/Visiology Monitoring Template/agent.ping,35s)=1'
+        -
+          uuid: 36420048aba941e9b568cbf0ce6f6366
+          name: 'Smart-forms error'
+          type: DEPENDENT
+          key: sf.error
+          delay: '0'
+          history: 7d
+          trends: '0'
+          value_type: TEXT
+          preprocessing:
+            -
+              type: REGEX
+              parameters:
+                - '.*ERROR.*'
+                - \0
+              error_handler: CUSTOM_VALUE
+              error_handler_params: ' '
+          master_item:
+            key: 'log[/var/lib/docker/containers/{$LOG_VISIOLOGY_SMART_FORMS}/{$LOG_VISIOLOGY_SMART_FORMS}-json.log,,,200, skip]'
+          tags:
+            -
+              tag: sf
+              value: errors
+          triggers:
+            -
+              uuid: ece2e7b9c86d47d28148cbe35207a60a
+              expression: 'length(last(/Visiology Monitoring Template/sf.error,#1))>5'
+              name: 'Smart-forms Error Has Occurred'
+              priority: AVERAGE
+              dependencies:
+                -
+                  name: 'Zabbix agent is down'
+                  expression: 'nodata(/Visiology Monitoring Template/agent.ping,35s)=1'
+        -
+          uuid: 6b624325089a416cb4221030a6d946ee
+          name: 'Smart-forms transfer finished'
+          type: DEPENDENT
+          key: sf.transfer_finished
+          delay: '0'
+          history: 7d
+          preprocessing:
+            -
+              type: REGEX
+              parameters:
+                - GetNextTransferDate
+                - '1'
+              error_handler: CUSTOM_VALUE
+              error_handler_params: '0'
+          master_item:
+            key: 'log[/var/lib/docker/containers/{$LOG_VISIOLOGY_SMART_FORMS}/{$LOG_VISIOLOGY_SMART_FORMS}-json.log,,,200, skip]'
+          tags:
+            -
+              tag: platform
+              value: logs
+          triggers:
+            -
+              uuid: c8ab84f5e3374e98b69b66b9f564e2e0
+              expression: 'last(/Visiology Monitoring Template/sf.transfer_finished,#1)>0'
+              name: 'Smart-forms transfer finished'
+              priority: WARNING
+              dependencies:
+                -
+                  name: 'Zabbix agent is down'
+                  expression: 'nodata(/Visiology Monitoring Template/agent.ping,35s)=1'
+        -
+          uuid: a336ff8164a64c608d79ddda80e73c13
+          name: 'Smart-forms transfer started'
+          type: DEPENDENT
+          key: sf.transfer_started
+          delay: '0'
+          history: 7d
+          preprocessing:
+            -
+              type: REGEX
+              parameters:
+                - StartTransfer
+                - '1'
+              error_handler: CUSTOM_VALUE
+              error_handler_params: '0'
+          master_item:
+            key: 'log[/var/lib/docker/containers/{$LOG_VISIOLOGY_SMART_FORMS}/{$LOG_VISIOLOGY_SMART_FORMS}-json.log,,,200, skip]'
+          tags:
+            -
+              tag: platform
+              value: logs
+          triggers:
+            -
+              uuid: 4d3cc3b6e5c94a4196ab41616b267224
+              expression: 'last(/Visiology Monitoring Template/sf.transfer_started,#1)>0'
+              name: 'Smart-form transfer started'
+              priority: WARNING
+              dependencies:
+                -
+                  name: 'Zabbix agent is down'
+                  expression: 'nodata(/Visiology Monitoring Template/agent.ping,35s)=1'
+        -
+          uuid: c9129922a48748ed8840bc1f6ec37b3b
+          name: 'SSL certificate validity seconds remainning'
+          type: DEPENDENT
+          key: ssl.validdate
+          delay: '0'
+          history: 1h
+          trends: '0'
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $..not_after.timestamp.first()
+            -
+              type: JAVASCRIPT
+              parameters:
+                - 'return value-(Date.now()/1000>>0);'
+          master_item:
+            key: 'web.certificate.get[{$HOST_URL}]'
+          tags:
+            -
+              tag: component
+              value: raw
+          triggers:
+            -
+              uuid: 39ce014ac1ef467d8080a706836e7b42
+              expression: 'last(/Visiology Monitoring Template/ssl.validdate,#1)<259200'
+              name: 'SSL certificate  almost expired'
+              priority: HIGH
+        -
+          uuid: ea1550d89aea40f4ae1846f7b95376ae
+          name: boottime
+          type: ZABBIX_ACTIVE
+          key: system.boottime
+          history: 1h
+          triggers:
+            -
+              uuid: 0d2d247726204331a472218a2f2dc9c0
+              expression: 'now()-last(/Visiology Monitoring Template/system.boottime,#1)<180'
+              name: 'Host has been restarted'
+              priority: WARNING
+        -
+          uuid: d0d3668ce7fc4ac3956edfd844078221
+          name: 'CPU count'
+          type: ZABBIX_ACTIVE
+          key: 'system.cpu.num[]'
+          delay: 5m
+          history: 7d
+          tags:
+            -
+              tag: component
+              value: cpu
+          triggers:
+            -
+              uuid: 6e5a38900ce14e37805c57e348ae363c
+              expression: 'last(/Visiology Monitoring Template/system.cpu.num[],#1)<2'
+              name: 'Lack of CPU quantity'
+              priority: HIGH
+        -
+          uuid: 954f438223bd4074814e0ea3149fffa6
+          name: 'CPU utilization'
+          type: DEPENDENT
+          key: system.cpu.util
+          delay: '0'
+          history: 7d
+          value_type: FLOAT
+          units: '%'
+          description: 'CPU utilization in %'
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |
+                  //Calculate utilization
+                  return (100 - value)
+          master_item:
+            key: 'system.cpu.util[,idle]'
+          tags:
+            -
+              tag: component
+              value: cpu
+          triggers:
+            -
+              uuid: 3671ac1aba524f23b2468336648835e2
+              expression: 'avg(/Visiology Monitoring Template/system.cpu.util,1m)>85'
+              name: 'CPU overloading >85%'
+              priority: HIGH
+        -
+          uuid: cb9f548419b84984b4ba54051dee5ab3
+          name: 'CPU idle time'
+          type: ZABBIX_ACTIVE
+          key: 'system.cpu.util[,idle]'
+          history: 7d
+          value_type: FLOAT
+          units: '%'
+          description: 'The time the CPU has spent doing nothing.'
+          tags:
+            -
+              tag: component
+              value: cpu
+        -
+          uuid: 4b1371d664dc4435b379e25e724ae245
+          name: 'CPU(0) name'
+          type: ZABBIX_ACTIVE
+          key: 'system.hw.cpu[0,model]'
+          delay: 1h
+          trends: '0'
+          value_type: CHAR
+          tags:
+            -
+              tag: component
+              value: cpu
+        -
+          uuid: ba5d663fe84f49cfb2d642a506f522aa
+          name: 'Host local time'
+          type: ZABBIX_ACTIVE
+          key: 'system.localtime[local]'
+          history: 1h
+          trends: '0'
+          value_type: CHAR
+          tags:
+            -
+              tag: component
+              value: raw
+        -
+          uuid: 95ff0572039849b985e506ccd9da204b
+          name: 'Shell command'
+          type: ZABBIX_ACTIVE
+          key: 'system.run[ mkdir /tmp/123,nowait]'
+          history: '0'
+          trends: '0'
+          status: DISABLED
+          value_type: TEXT
+        -
+          uuid: bc677b961e6846d39a11aa8038d77f2a
+          name: 'Host free swap space in %'
+          type: ZABBIX_ACTIVE
+          key: 'system.swap.size[,pfree]'
+          history: 7d
+          value_type: FLOAT
+          units: '%'
+          description: 'The free space of swap volume/file in percent.'
+          tags:
+            -
+              tag: component
+              value: memory
+            -
+              tag: component
+              value: storage
+          triggers:
+            -
+              uuid: 045bc1707ede4e37b0d2cff55dd99821
+              expression: 'last(/Visiology Monitoring Template/system.swap.size[,pfree],#1)<100'
+              name: 'Swap in use'
+              priority: HIGH
+              dependencies:
+                -
+                  name: 'Zabbix agent is down'
+                  expression: 'nodata(/Visiology Monitoring Template/agent.ping,35s)=1'
+        -
+          uuid: c4be0e89ef504fb68117b5df1231a412
+          name: 'Host total swap space'
+          type: ZABBIX_ACTIVE
+          key: 'system.swap.size[,total]'
+          history: 7d
+          units: B
+          description: 'The total space of swap volume/file in bytes.'
+          tags:
+            -
+              tag: component
+              value: memory
+            -
+              tag: component
+              value: storage
+        -
+          uuid: 2156ede3328d41928bed6b0cb89926b6
+          name: 'HTTPS state'
+          type: ZABBIX_ACTIVE
+          key: 'vfs.file.contents[/docker-volume/httpsState]'
+          delay: 5m
+          history: 1h
+          trends: '0'
+          value_type: TEXT
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |
+                  try {
+                  ///////////////////////
+                  //Token
+                  var req = new CurlHttpRequest(),
+                  payload ={
+                          "jsonrpc":"2.0",
+                  		"method":"user.login",
+                  		"params":{
+                  			"user":"{$ADMIN.USER}",
+                  			"password":"{$ADMIN.PASSWORD}"
+                  			},
+                  		"id":1,
+                  		"auth":null
+                  },
+                  apiurl = '{$ZABBIX.HOST}'+'/api_jsonrpc.php';
+                  req.AddHeader('Content-Type: application/json');
+                  var token =  JSON.parse(req.Post(apiurl, JSON.stringify(payload)));
+                  /////// check macro exists
+                  var macro_id;
+                  payload = {
+                  		"jsonrpc": "2.0",
+                  		"method": "usermacro.get",
+                  		"params":{
+                  				  "hostids": {$HOST_ID},
+                  				  "output":["hostmacroid"],
+                  				  "filter":{
+                  					   "macro": "{$"+"HOST_URL}"
+                  						 }
+                  		 },
+                  		"auth": token.result,
+                  		"id": 1
+                  };
+                  macro_id = JSON.parse(req.Post(apiurl, JSON.stringify(payload))).result[0].hostmacroid;
+                  var sch = "http://";
+                  if (value == "on")
+                      sch = "https://";
+                  payload={
+                      "jsonrpc": "2.0",
+                      "method": "usermacro.update",
+                      "params": {
+                          "hostmacroid": macro_id,
+                          "value": sch+"{$HOST_URL}"
+                      },
+                      "auth": token.result,
+                      "id": 1
+                  }
+                  result = value;
+                  if (!("{$HOST_URL}".includes("http"))){
+                      var setmacro = JSON.parse(req.Post(apiurl, JSON.stringify(payload)));
+                  }
+                  
+                  /////////////////////////////////////////////
+                  } catch (error) {
+                       result = 0;
+                  }
+                  ////////////////////////////////////////////
+                  return result;
+          tags:
+            -
+              tag: platform
+              value: settings
+        -
+          uuid: 0d466c7f998347cd8f81f19bc9526d1c
+          name: 'Platform URL'
+          type: ZABBIX_ACTIVE
+          key: 'vfs.file.contents[/docker-volume/ipState]'
+          delay: 5m
+          history: 1h
+          trends: '0'
+          value_type: TEXT
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |
+                  try {
+                  ///////////////////////
+                  //Token
+                  var req = new CurlHttpRequest(),
+                  payload ={
+                          "jsonrpc":"2.0",
+                  		"method":"user.login",
+                  		"params":{
+                  			"user":"{$ADMIN.USER}",
+                  			"password":"{$ADMIN.PASSWORD}"
+                  			},
+                  		"id":1,
+                  		"auth":null
+                  },
+                  apiurl = '{$ZABBIX.HOST}'+'/api_jsonrpc.php';
+                  req.AddHeader('Content-Type: application/json');
+                  var token =  JSON.parse(req.Post(apiurl, JSON.stringify(payload)));
+                  /////// check macro exists
+                  var macro_id,macro_value;
+                  if ("{$"+"HOST_URL}" != "{$HOST_URL}"){
+                  	// if exists
+                  	payload = {
+                  		"jsonrpc": "2.0",
+                  		"method": "usermacro.get",
+                  		"params":{
+                  				  "hostids": {$HOST_ID},
+                  				  "output":["hostmacroid"],
+                  				  "filter":{
+                  					   "macro":"{$"+"HOST_URL}"
+                  						 }
+                  		 },
+                  		"auth": token.result,
+                  		"id": 1
+                  	};
+                          macro_value=JSON.parse(req.Post(apiurl, JSON.stringify(payload)));
+                  	macro_id =macro_value.result[0].hostmacroid;
+                          //macro_value = JSON.parse(req.Post(apiurl, JSON.stringify(payload))).result[0].value;
+                  }
+                  payload={
+                      "jsonrpc": "2.0",
+                      "method": "usermacro.update",
+                      "params": {
+                          "hostmacroid": macro_id,
+                          "value": "{$HOST_URL}".replace(/(http:\/\/|https:\/\/)?.*/,"$1"+value)
+                      },
+                      "auth": token.result,
+                      "id": 1
+                  }
+                  if (macro_id != "" ) JSON.parse(req.Post(apiurl, JSON.stringify(payload)));
+                  
+                  /////////////////////////////////////////////
+                  } catch (error) {
+                      return 0; //token.result+JSON.stringify(macro_value);
+                  }
+                  ////////////////////////////////////////////
+                  return value; //JSON.stringify(macro_value);
+          tags:
+            -
+              tag: platform
+              value: settings
+          triggers:
+            -
+              uuid: d54f61290e834838a29de66a70e6581e
+              expression: 'last(/Visiology Monitoring Template/vfs.file.contents[/docker-volume/ipState],#2)<>last(/Visiology Monitoring Template/vfs.file.contents[/docker-volume/ipState],#1)'
+              name: 'Start-script URl has been changed'
+              priority: WARNING
+              dependencies:
+                -
+                  name: 'Zabbix agent is down'
+                  expression: 'nodata(/Visiology Monitoring Template/agent.ping,35s)=1'
+        -
+          uuid: 7395ccf4c81f4ce596ad52744ead1f86
+          name: 'Policy state'
+          type: ZABBIX_ACTIVE
+          key: 'vfs.file.contents[/docker-volume/policyState]'
+          delay: 5m
+          history: 1h
+          trends: '0'
+          value_type: TEXT
+          tags:
+            -
+              tag: platform
+              value: settings
+          triggers:
+            -
+              uuid: 0220579c41d2468985b3462ebaa6ef76
+              expression: 'last(/Visiology Monitoring Template/vfs.file.contents[/docker-volume/policyState],#1)<>last(/Visiology Monitoring Template/vfs.file.contents[/docker-volume/policyState],#2)'
+              name: 'Policy state has been changed'
+              priority: WARNING
+              dependencies:
+                -
+                  name: 'Zabbix agent is down'
+                  expression: 'nodata(/Visiology Monitoring Template/agent.ping,35s)=1'
+        -
+          uuid: 31f7a9d908b84d478f9cd59dd0db6f46
+          name: 'Seq state'
+          type: ZABBIX_ACTIVE
+          key: 'vfs.file.contents[/docker-volume/seqState]'
+          delay: 5m
+          history: 1h
+          trends: '0'
+          value_type: TEXT
+          tags:
+            -
+              tag: platform
+              value: settings
+        -
+          uuid: d8039341188a44ab8c22c4bb5dc28e05
+          name: 'Hardware ID'
+          type: ZABBIX_ACTIVE
+          key: 'vfs.file.contents[/var/lib/docker/volumes/visiology_hardwareid/_data/key]'
+          delay: 1h
+          history: 7d
+          trends: '0'
+          status: DISABLED
+          value_type: TEXT
+          triggers:
+            -
+              uuid: ede3cc6445734636883e62d8e2457e1c
+              expression: 'last(/Visiology Monitoring Template/vfs.file.contents[/var/lib/docker/volumes/visiology_hardwareid/_data/key],#1)<>last(/Visiology Monitoring Template/vfs.file.contents[/var/lib/docker/volumes/visiology_hardwareid/_data/key],#2)'
+              name: 'Hardware ID has been changed'
+              status: DISABLED
+              priority: AVERAGE
+        -
+          uuid: 66836bc847d643abbaef996b01324c27
+          name: 'ViQube snapshot size'
+          type: ZABBIX_ACTIVE
+          key: 'vfs.file.size[/docker-volume/viqube/snapshots/auto.snapshot]'
+          history: 7d
+          units: byte
+          tags:
+            -
+              tag: viqube
+              value: snapshot
+        -
+          uuid: b6f00aacfbcc447c9d90d7aea5d31fa8
+          name: 'Docker-volume partition free'
+          type: ZABBIX_ACTIVE
+          key: 'vfs.fs.size[/docker-volume,free]'
+          history: 7d
+          units: B
+          tags:
+            -
+              tag: component
+              value: storage
+        -
+          uuid: 412690fcd8404b6488bd9586e5864248
+          name: 'Docker-volume partition total'
+          type: ZABBIX_ACTIVE
+          key: 'vfs.fs.size[/docker-volume,total]'
+          delay: 1h
+          history: 7d
+          units: B
+          tags:
+            -
+              tag: component
+              value: storage
+        -
+          uuid: 5d2db10bd9984ed4aa58785b23ee7dcb
+          name: 'ViQube-Admin error'
+          type: DEPENDENT
+          key: viqube-admin.error
+          delay: '0'
+          history: 7d
+          trends: '0'
+          value_type: TEXT
+          preprocessing:
+            -
+              type: REGEX
+              parameters:
+                - '.*ERROR.*'
+                - \0
+              error_handler: CUSTOM_VALUE
+              error_handler_params: ' '
+          master_item:
+            key: 'log[/var/lib/docker/containers/{$LOG_VISIOLOGY_VIQUBE_ADMIN}/{$LOG_VISIOLOGY_VIQUBE_ADMIN}-json.log,".*Запрос.*",,100, skip]'
+          tags:
+            -
+              tag: viqube-admin
+              value: errors
+          triggers:
+            -
+              uuid: 6c7b91c691f942dba6d319c81f693fdd
+              expression: 'length(last(/Visiology Monitoring Template/viqube-admin.error,#1))>5'
+              name: 'ViQube-Admin Error Has Occurred'
+              priority: AVERAGE
+              dependencies:
+                -
+                  name: 'Zabbix agent is down'
+                  expression: 'nodata(/Visiology Monitoring Template/agent.ping,35s)=1'
+        -
+          uuid: 377e8987f43f44dd8edf586fe03a09c3
+          name: 'ViQube-Admin Loader Opened'
+          type: DEPENDENT
+          key: viqube-admin.loader-opened
+          delay: '0'
+          history: 7d
+          preprocessing:
+            -
+              type: REGEX
+              parameters:
+                - POST\s/vqadmin/site/dataSources/tabular/mappingDialog/getState
+                - '1'
+              error_handler: CUSTOM_VALUE
+              error_handler_params: '0'
+          master_item:
+            key: 'log[/var/lib/docker/containers/{$LOG_VISIOLOGY_VIQUBE_ADMIN}/{$LOG_VISIOLOGY_VIQUBE_ADMIN}-json.log,".*Запрос.*",,100, skip]'
+          triggers:
+            -
+              uuid: 4086de25231d4e67bf89ecc19ef8b8a9
+              expression: 'last(/Visiology Monitoring Template/viqube-admin.loader-opened,#1)=1'
+              name: 'some ViQube-Admin loader dialog has been opened'
+              priority: INFO
+              dependencies:
+                -
+                  name: 'Zabbix agent is down'
+                  expression: 'nodata(/Visiology Monitoring Template/agent.ping,35s)=1'
+        -
+          uuid: 92d968238eeb44cfab868a8b974e6a64
+          name: 'ViQube-Admin Loader Saved'
+          type: DEPENDENT
+          key: viqube-admin.loader-saved
+          delay: '0'
+          history: 7d
+          preprocessing:
+            -
+              type: REGEX
+              parameters:
+                - PUT\s/vqadmin/site/dataSources
+                - '1'
+              error_handler: CUSTOM_VALUE
+              error_handler_params: '0'
+          master_item:
+            key: 'log[/var/lib/docker/containers/{$LOG_VISIOLOGY_VIQUBE_ADMIN}/{$LOG_VISIOLOGY_VIQUBE_ADMIN}-json.log,".*Запрос.*",,100, skip]'
+          tags:
+            -
+              tag: platform
+              value: logs
+          triggers:
+            -
+              uuid: c443732da2e943a087058b040c9a3a88
+              expression: 'last(/Visiology Monitoring Template/viqube-admin.loader-saved,#1)=1'
+              name: 'some ViQube-Admin loader dialog has been saved'
+              priority: INFO
+              dependencies:
+                -
+                  name: 'Zabbix agent is down'
+                  expression: 'nodata(/Visiology Monitoring Template/agent.ping,35s)=1'
+        -
+          uuid: 94395bceecfe4e16942dc15518ffc7a6
+          name: 'ViQube-Admin Loader Started'
+          type: DEPENDENT
+          key: viqube-admin.loader-started
+          delay: '0'
+          history: 7d
+          preprocessing:
+            -
+              type: REGEX
+              parameters:
+                - POST\s/vqadmin/site/dataSources/tabular/startLoading
+                - '1'
+              error_handler: CUSTOM_VALUE
+              error_handler_params: '0'
+          master_item:
+            key: 'log[/var/lib/docker/containers/{$LOG_VISIOLOGY_VIQUBE_ADMIN}/{$LOG_VISIOLOGY_VIQUBE_ADMIN}-json.log,".*Запрос.*",,100, skip]'
+          triggers:
+            -
+              uuid: ceb05f850f274cf284e3041984019a45
+              expression: 'last(/Visiology Monitoring Template/viqube-admin.loader-started,#1)=1'
+              name: 'some ViQube-Admin loader has been started'
+              priority: INFO
+              dependencies:
+                -
+                  name: 'Zabbix agent is down'
+                  expression: 'nodata(/Visiology Monitoring Template/agent.ping,35s)=1'
+        -
+          uuid: 7f36c59542e143e1a415d95bb3605510
+          name: 'ViQube startdate'
+          type: DEPENDENT
+          key: viqube.startdate
+          delay: '0'
+          history: 7d
+          trends: '0'
+          value_type: CHAR
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |
+                  var y=JSON.parse(value);
+                  return y.startDate;
+          master_item:
+            key: 'web.page.get[{$HOST_URL},viqube/version]'
+          tags:
+            -
+              tag: viqube
+              value: timing
+        -
+          uuid: bcdfc2d1a3d845c787d13c414048eec8
+          name: 'ViQube uptime'
+          type: DEPENDENT
+          key: viqube.uptime
+          delay: '0'
+          history: 7d
+          trends: '0'
+          value_type: CHAR
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |
+                  var y=JSON.parse(value);
+                  return y.uptime;
+          master_item:
+            key: 'web.page.get[{$HOST_URL},viqube/version]'
+          tags:
+            -
+              tag: viqube
+              value: timing
+        -
+          uuid: 44159f221fe248c691f386c90d394841
+          name: 'Host available memory'
+          type: ZABBIX_ACTIVE
+          key: 'vm.memory.size[available]'
+          history: 7d
+          units: B
+          description: 'Available memory, in Linux, available = free + buffers + cache. On other platforms calculation may vary. See also Appendixes in Zabbix Documentation about parameters of the vm.memory.size item.'
+          tags:
+            -
+              tag: component
+              value: memory
+        -
+          uuid: 2cc508feaa2e4c4b920b7b9d32e96e79
+          name: 'Host available memory in %'
+          type: ZABBIX_ACTIVE
+          key: 'vm.memory.size[pavailable]'
+          history: 7d
+          value_type: FLOAT
+          units: '%'
+          description: 'Available memory as percentage of total. See also Appendixes in Zabbix Documentation about parameters of the vm.memory.size item.'
+          tags:
+            -
+              tag: component
+              value: memory
+        -
+          uuid: 8e77400dc82848829766c8abbd73afee
+          name: 'Host total memory'
+          type: ZABBIX_ACTIVE
+          key: 'vm.memory.size[total]'
+          history: 7d
+          units: B
+          description: 'Total memory in Bytes'
+          tags:
+            -
+              tag: component
+              value: memory
+          triggers:
+            -
+              uuid: 3826764aa885427a97d70d98e7695179
+              expression: 'last(/Visiology Monitoring Template/vm.memory.size[total])<6000000'
+              name: 'Lack of RAM'
+              priority: HIGH
+        -
+          uuid: b4874a6c73ec400f931882c9ec903a99
+          name: 'Host memory utilization'
+          type: DEPENDENT
+          key: vm.memory.utilization
+          delay: '0'
+          history: 7d
+          value_type: FLOAT
+          units: '%'
+          description: 'Memory used percentage is calculated as (100-pavailable)'
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - 'return (100-value);'
+          master_item:
+            key: 'vm.memory.size[pavailable]'
+          tags:
+            -
+              tag: component
+              value: memory
+        -
+          uuid: 728abf5326e34c748105e3bc9693beba
+          name: 'SSL Certificate Information'
+          type: ZABBIX_ACTIVE
+          key: 'web.certificate.get[{$HOST_URL}]'
+          delay: 5m
+          history: '0'
+          trends: '0'
+          value_type: TEXT
+          inventory_link: SITE_NOTES
+          tags:
+            -
+              tag: platform
+              value: ssl
+        -
+          uuid: c81f5a996e084682965f0ff622ad9fa6
+          name: 'ViQube Info'
+          type: ZABBIX_ACTIVE
+          key: 'web.page.get[{$HOST_URL},viqube/version]'
+          delay: 10m
+          history: '0'
+          trends: '0'
+          value_type: TEXT
+          preprocessing:
+            -
+              type: REGEX
+              parameters:
+                - '({.*})'
+                - \1
+          tags:
+            -
+              tag: viqube
+              value: info
+        -
+          uuid: c249611fabdf43bbaf479c2b0e3d9750
+          name: 'Platform URL from a container'
+          type: ZABBIX_ACTIVE
+          key: 'web.page.perf[{$HOST_URL},"/viqube/version"]'
+          history: 7d
+          value_type: FLOAT
+          tags:
+            -
+              tag: platform
+              value: settings
+          triggers:
+            -
+              uuid: efbddfd3528346008890ac0a4aefc954
+              expression: 'nodata(/Visiology Monitoring Template/web.page.perf[{$HOST_URL},"/viqube/version"],10m)=1'
+              name: 'No connection to URL from containers'
+              priority: HIGH
+              dependencies:
+                -
+                  name: 'Zabbix agent is down'
+                  expression: 'nodata(/Visiology Monitoring Template/agent.ping,35s)=1'
+      discovery_rules:
+        -
+          uuid: 3055338911e645d1ac5b4c69aa94e9f7
+          name: 'Containers discovery'
+          type: ZABBIX_ACTIVE
+          key: 'docker.containers.discovery[false]'
+          delay: 5m
+          filter:
+            evaltype: AND
+            conditions:
+              -
+                macro: '{#NAME}'
+                value: '{$DOCKER.LLD.FILTER.CONTAINER.MATCHES}'
+                formulaid: A
+              -
+                macro: '{#NAME}'
+                value: '{$DOCKER.LLD.FILTER.CONTAINER.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
+                formulaid: B
+          lifetime: 1h
+          description: |
+            Discovery for containers metrics
+            
+            Parameter:
+            true  - Returns all containers
+            false - Returns only running containers
+          item_prototypes:
+            -
+              uuid: bd3f2f90db3a42a49f16379e2a66d5e8
+              name: 'Service {#SERVICE}: Started at'
+              type: DEPENDENT
+              key: 'docker.container_info.started["{#MACROS}"]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              units: unixtime
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - $.State.StartedAt
+                -
+                  type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1d
+              master_item:
+                key: 'docker.container_info["{#MACROS}"]'
+              tags:
+                -
+                  tag: component
+                  value: system
+                -
+                  tag: container
+                  value: '{#SERVICE}'
+            -
+              uuid: d1fb9b96b81f471ebbce5b3f13ea44a0
+              name: 'Service {#SERVICE}: Running'
+              type: DEPENDENT
+              key: 'docker.container_info.state.running["{#MACROS}"]'
+              delay: '0'
+              history: 7d
+              valuemap:
+                name: 'Docker flag'
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - $.State.Running
+                -
+                  type: BOOL_TO_DECIMAL
+                  parameters:
+                    - ''
+              master_item:
+                key: 'docker.container_info["{#MACROS}"]'
+              tags:
+                -
+                  tag: component
+                  value: system
+                -
+                  tag: container
+                  value: '{#SERVICE}'
+              trigger_prototypes:
+                -
+                  uuid: 928f851a476241fc9c307365bd899512
+                  expression: 'nodata(/Visiology Monitoring Template/docker.container_info.state.running["{#MACROS}"],80s)=1'
+                  name: 'Service {#SERVICE} id down'
+                  priority: HIGH
+                  dependencies:
+                    -
+                      name: 'Zabbix agent is down'
+                      expression: 'nodata(/Visiology Monitoring Template/agent.ping,35s)=1'
+            -
+              uuid: 883c679b533f4cd6bce2e17cb95b7cd9
+              name: 'Service {#SERVICE}: Get info'
+              type: ZABBIX_ACTIVE
+              key: 'docker.container_info["{#MACROS}"]'
+              history: '0'
+              trends: '0'
+              value_type: CHAR
+              description: 'Return low-level information about a container'
+              tags:
+                -
+                  tag: component
+                  value: raw
+                -
+                  tag: container
+                  value: '{#SERVICE}'
+            -
+              uuid: 7259ca9fec93417784b30255938e9e2b
+              name: 'Service {#SERVICE}: CPU percent usage'
+              type: DEPENDENT
+              key: 'docker.container_stats.cpu_pct_usage["{#MACROS}"]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              units: '%'
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - $.cpu_stats.cpu_usage.percent_usage
+              master_item:
+                key: 'docker.container_stats["{#MACROS}"]'
+              tags:
+                -
+                  tag: component
+                  value: cpu
+                -
+                  tag: container
+                  value: '{#SERVICE}'
+            -
+              uuid: 5188bb0224c8412292c66d3bab84568d
+              name: 'Service {#SERVICE}: Memory maximum usage'
+              type: DEPENDENT
+              key: 'docker.container_stats.memory.max_usage["{#MACROS}"]'
+              delay: '0'
+              history: 7d
+              units: B
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - $.memory_stats.max_usage
+              master_item:
+                key: 'docker.container_stats["{#MACROS}"]'
+              tags:
+                -
+                  tag: component
+                  value: memory
+                -
+                  tag: container
+                  value: '{#SERVICE}'
+            -
+              uuid: ac0dc832cd114c6aa4a075102ca71bbc
+              name: 'Service {#SERVICE}: Memory usage'
+              type: DEPENDENT
+              key: 'docker.container_stats.memory.usage["{#MACROS}"]'
+              delay: '0'
+              history: 7d
+              units: B
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - $.memory_stats.usage
+              master_item:
+                key: 'docker.container_stats["{#MACROS}"]'
+              tags:
+                -
+                  tag: component
+                  value: memory
+                -
+                  tag: container
+                  value: '{#SERVICE}'
+            -
+              uuid: f051bd87e4944a2cbd53718bd12970f8
+              name: 'Service {#SERVICE}: Get stats'
+              type: ZABBIX_ACTIVE
+              key: 'docker.container_stats["{#MACROS}"]'
+              history: '0'
+              trends: '0'
+              value_type: CHAR
+              description: 'Get container stats based on resource usage'
+              tags:
+                -
+                  tag: component
+                  value: raw
+                -
+                  tag: container
+                  value: '{#SERVICE}'
+            -
+              uuid: c444497d668a48fd97e576f2304fc3d9
+              name: 'Setup Buffer macro {#SERVICE}'
+              type: SCRIPT
+              key: 'macro.setup[{#SERVICE}]'
+              history: '0'
+              trends: '0'
+              params: |
+                try {
+                ///////////////////////
+                //Token
+                var req = new CurlHttpRequest(),
+                payload ={
+                        "jsonrpc":"2.0",
+                		"method":"user.login",
+                		"params":{
+                			"user":"{$ADMIN.USER}",
+                			"password":"{$ADMIN.PASSWORD}"
+                			},
+                		"id":1,
+                		"auth":null
+                },
+                apiurl = '{$ZABBIX.HOST}'+'/api_jsonrpc.php';
+                req.AddHeader('Content-Type: application/json');
+                var token =  JSON.parse(req.Post(apiurl, JSON.stringify(payload)));
+                /////// check macro exists
+                var macro_id;
+                if ("{$"+"{#MACROPART}"+"}" == "{${#MACROPART}}"){
+                	// Create macro
+                	payload= {
+                		"jsonrpc": "2.0",
+                		"method": "usermacro.create",
+                		"params": {
+                			"hostid": {$HOST_ID},
+                			"macro": "{$"+"{#MACROPART}"+"}",
+                			"value": "{#NAME}"
+                		},
+                		"auth": token.result,
+                		"id": 1
+                	};
+                	response = req.Post(apiurl, JSON.stringify(payload));
+                	macro_id = response.result[0].hostmacroid;
+                }
+                else{
+                	// if exists
+                	payload = {
+                		"jsonrpc": "2.0",
+                		"method": "usermacro.get",
+                		"params":{
+                				  "hostids": {$HOST_ID},
+                				  "output":["hostmacroid"],
+                				  "filter":{
+                					   "macro":"{$"+"{#MACROPART}"+"}"
+                						 }
+                		 },
+                		"auth": token.result,
+                		"id": 1
+                	};
+                	macro_id = JSON.parse(req.Post(apiurl, JSON.stringify(payload))).result[0].hostmacroid;
+                }
+                payload={
+                    "jsonrpc": "2.0",
+                    "method": "usermacro.update",
+                    "params": {
+                        "hostmacroid": macro_id,
+                        "value": "{#NAME}"
+                    },
+                    "auth": token.result,
+                    "id": 1
+                }
+                JSON.parse(req.Post(apiurl, JSON.stringify(payload)));
+                //////////////////////Logs MACRO ///////////////////////////////////
+                /////// check macro exists
+                var services_log = [{$LOG_LIST}];
+                var st=services_log.join(',');
+                macro_id = '';
+                if ("{$LOG_"+"{#MACROPART}"+"}" == "{$LOG_{#MACROPART}}"){
+                	// Create macro if NAME in a list
+                        if(st.indexOf('{#MACROPART}') > -1){
+                	   payload= {
+                		"jsonrpc": "2.0",
+                		"method": "usermacro.create",
+                		"params": {
+                			"hostid": {$HOST_ID},
+                			"macro": "{$LOG_"+"{#MACROPART}"+"}",
+                			"value": "{#ID}"
+                		},
+                		"auth": token.result,
+                		"id": 1
+                	  };
+                	  response = req.Post(apiurl, JSON.stringify(payload));
+                	  macro_id = response.result[0].hostmacroid;
+                        }
+                }
+                else{
+                	// if exists
+                        if(st.indexOf('{#MACROPART}') > -1){
+                	   payload = {
+                		"jsonrpc": "2.0",
+                		"method": "usermacro.get",
+                		"params":{
+                				  "hostids": {$HOST_ID},
+                				  "output":["hostmacroid"],
+                				  "filter":{
+                					   "macro":"{$LOG_"+"{#MACROPART}"+"}"
+                						 }
+                		 },
+                		"auth": token.result,
+                		"id": 1
+                	   };
+                	   macro_id = JSON.parse(req.Post(apiurl, JSON.stringify(payload))).result[0].hostmacroid;
+                         }
+                }
+                payload={
+                    "jsonrpc": "2.0",
+                    "method": "usermacro.update",
+                    "params": {
+                        "hostmacroid": macro_id,
+                        "value": "{#ID}"
+                    },
+                    "auth": token.result,
+                    "id": 1
+                }
+                if (macro_id != "") JSON.parse(req.Post(apiurl, JSON.stringify(payload)));
+                
+                /////////////////////////////////////////////
+                } catch (error) {
+                    return 0;
+                }
+                ////////////////////////////////////////////
+                return 1;
+              tags:
+                -
+                  tag: template
+                  value: installation
+          graph_prototypes:
+            -
+              uuid: 208645aa1a914cde99664502c18cdbc0
+              name: 'Service {#SERVICE}: Memory usage'
+              graph_items:
+                -
+                  color: 1A7C11
+                  item:
+                    host: 'Visiology Monitoring Template'
+                    key: 'docker.container_stats.memory.usage["{#MACROS}"]'
+                -
+                  sortorder: '1'
+                  color: FF0000
+                  item:
+                    host: 'Visiology Monitoring Template'
+                    key: 'docker.container_stats.memory.max_usage["{#MACROS}"]'
+            -
+              uuid: 4acce28c0da94840a0f6e22fa2be323c
+              name: 'Service {#SERVICE} CPU usage %'
+              type: STACKED
+              graph_items:
+                -
+                  drawtype: GRADIENT_LINE
+                  color: F63100
+                  item:
+                    host: 'Visiology Monitoring Template'
+                    key: 'docker.container_stats.cpu_pct_usage["{#MACROS}"]'
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |
+                  var y=JSON.parse(value);
+                  var s='';
+                  y.forEach(function(e){
+                  var str=e['{#'+'NAME}'];
+                  var p=str.split(".")[0].replace('/','').replace(/-/g,'_');
+                  e['{#'+'SERVICE}']=p;
+                  p=p.toUpperCase();
+                  e['{#'+'MACROS}']='{$'+p+'}';
+                  e['{#'+'MACROPART}']=p;
+                  });
+                  return JSON.stringify(y);
+        -
+          uuid: 9a4f976e10204a2e986d25c22fe1815b
+          name: 'Images discovery'
+          type: ZABBIX_ACTIVE
+          key: docker.images.discovery
+          delay: 15m
+          filter:
+            evaltype: AND
+            conditions:
+              -
+                macro: '{#NAME}'
+                value: '{$DOCKER.LLD.FILTER.IMAGE.MATCHES}'
+                formulaid: A
+              -
+                macro: '{#NAME}'
+                value: '{$DOCKER.LLD.FILTER.IMAGE.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
+                formulaid: B
+          lifetime: 3d
+          description: 'Discovery for images metrics'
+          item_prototypes:
+            -
+              uuid: bd8f3b3c907d4a54a8a932ad9952b9b8
+              name: 'Image {{#NAME}.regsub("(.*release\/)(.*:[0-9.]*)", \2)}: Created'
+              type: DEPENDENT
+              key: 'docker.image.created["{#ID}"]'
+              delay: '0'
+              history: 7d
+              units: unixtime
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - '$[?(@.Id == "{#ID}")].Created.first()'
+                -
+                  type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1d
+              master_item:
+                key: docker.images
+              tags:
+                -
+                  tag: component
+                  value: system
+                -
+                  tag: image
+                  value: '{{#NAME}.regsub("(.*release\/)(.*:[0-9.]*)", \2)}'
+        -
+          uuid: 12ee5aed032247f28f0f319296bcc150
+          name: 'LoadPlans Discovery'
+          type: SCRIPT
+          key: loadplans.discovery
+          delay: 15m
+          params: |
+            var result=0;
+            try {
+            ///////////////////////
+            //Token
+            var req = new CurlHttpRequest(),
+            params = JSON.parse(value),
+            payload ='grant_type=password&scope=openid+profile+email+roles+viqube_api+viqubeadmin_api+core_logic_facade+dashboards_export_service+script_service+migration_service_api+data_collection&response_type=id_token+token&username={$PLATFORM_USER}&password={$PLATFORM_PASSWORD}',
+            apiurl = '{$HOST_URL}'+'/idsrv/connect/token';
+            req.AddHeader('Content-Type: application/x-www-form-urlencoded');
+            req.AddHeader('authorization: Basic cHVibGljX3JvX2NsaWVudDpAOVkjbmckXXU+SF4zajY=');
+            var token =  JSON.parse(req.Post(apiurl, payload)).access_token;
+            apiurl = '{$HOST_URL}'+'/vqadmin/api/databases/{$PLATFORM_DATABASE}/loadplans';
+            req.ClearHeader();
+            req.AddHeader('X-API-VERSION: 1.0');
+            req.AddHeader('authorization: Bearer '+token);
+            var plans =  req.Get(apiurl,null).replace(/id/gm,'{#'+'ID}').replace(/name/gm,'{#'+'NAME}').replace(/:([0-9]*),/gm,':"$1",');
+            result=plans;
+            /////////////////////////////////////////////
+            } catch (error) {
+                result = [];
+            }
+            ////////////////////////////////////////////
+            return result;
+          item_prototypes:
+            -
+              uuid: b5180111361047e5b3ea91d24a5a450e
+              name: 'Plan "{#NAME}" error'
+              type: DEPENDENT
+              key: 'plan.error[{#ID}]'
+              delay: '0'
+              history: 1d
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - $.error
+                -
+                  type: JAVASCRIPT
+                  parameters:
+                    - |
+                      if (value) return 0;
+                      return 1;
+              master_item:
+                key: 'plan.info[{#ID}]'
+              tags:
+                -
+                  tag: platform
+                  value: loadplan
+              trigger_prototypes:
+                -
+                  uuid: cc403509ee5a411c8ef144fe49a4f9b8
+                  expression: 'last(/Visiology Monitoring Template/plan.error[{#ID}],#1)=1'
+                  name: 'Plan "{#NAME}" error'
+                  priority: HIGH
+                  dependencies:
+                    -
+                      name: 'Zabbix agent is down'
+                      expression: 'nodata(/Visiology Monitoring Template/agent.ping,35s)=1'
+            -
+              uuid: f48db7ba9a5a4e9682ebc176abf4cb41
+              name: 'Plan "{#NAME}" info'
+              type: SCRIPT
+              key: 'plan.info[{#ID}]'
+              history: '0'
+              trends: '0'
+              value_type: CHAR
+              params: |
+                var result=0;
+                var req = new CurlHttpRequest(),
+                params = JSON.parse(value),
+                payload ='grant_type=password&scope=openid+profile+email+roles+viqube_api+viqubeadmin_api+core_logic_facade+dashboards_export_service+script_service+migration_service_api+data_collection&response_type=id_token+token&username={$PLATFORM_USER}&password={$PLATFORM_PASSWORD}',
+                apiurl = '{$HOST_URL}'+'/idsrv/connect/token';
+                try {
+                ///////////////////////
+                //Token
+                req.AddHeader('Content-Type: application/x-www-form-urlencoded');
+                req.AddHeader('authorization: Basic cHVibGljX3JvX2NsaWVudDpAOVkjbmckXXU+SF4zajY=');
+                var token =  JSON.parse(req.Post(apiurl, payload)).access_token;
+                apiurl = '{$HOST_URL}'+'/vqadmin/api/databases/{$PLATFORM_DATABASE}/loadplans/'+params.id+'/status';
+                req.ClearHeader();
+                req.AddHeader('X-API-VERSION: 1.0');
+                req.AddHeader('authorization: Bearer '+token);
+                var state =  req.Get(apiurl,null);
+                result=state;
+                /////////////////////////////////////////////
+                } catch (error) {
+                     result = '';
+                }
+                ////////////////////////////////////////////
+                return result;
+              parameters:
+                -
+                  name: id
+                  value: '{#ID}'
+              tags:
+                -
+                  tag: platform
+                  value: loadplan
+            -
+              uuid: 7e0462aad60146378a4b17519bf089a5
+              name: 'Plan "{#NAME}" progress'
+              type: DEPENDENT
+              key: 'plan.progress[{#ID}]'
+              delay: '0'
+              history: 1d
+              value_type: FLOAT
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - $.progress
+              master_item:
+                key: 'plan.info[{#ID}]'
+              tags:
+                -
+                  tag: platform
+                  value: loadplan
+              trigger_prototypes:
+                -
+                  uuid: 5e90e309fd6d451aa739b8c38df55649
+                  expression: 'change(/Visiology Monitoring Template/plan.progress[{#ID}])=0 and last(/Visiology Monitoring Template/plan.progress[{#ID}],#1)<>0'
+                  name: 'Plan "{#NAME}" hanged up'
+                  priority: HIGH
+            -
+              uuid: 87c3b6b0114c43ada6e9ff367f44dd1d
+              name: 'Plan "{#NAME}" status'
+              type: DEPENDENT
+              key: 'plan.status[{#ID}]'
+              delay: '0'
+              history: 1d
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - $.status
+                -
+                  type: STR_REPLACE
+                  parameters:
+                    - NotStarted
+                    - '0'
+                -
+                  type: STR_REPLACE
+                  parameters:
+                    - Finished
+                    - '2'
+                -
+                  type: STR_REPLACE
+                  parameters:
+                    - Running
+                    - '1'
+              master_item:
+                key: 'plan.info[{#ID}]'
+              tags:
+                -
+                  tag: platform
+                  value: loadplan
+              trigger_prototypes:
+                -
+                  uuid: 03f12ba8950442d5ad6adef481950cc5
+                  expression: 'last(/Visiology Monitoring Template/plan.status[{#ID}],#1)=2'
+                  name: 'Plan "{#NAME}" has been finished'
+                  priority: INFO
+                  dependencies:
+                    -
+                      name: 'Zabbix agent is down'
+                      expression: 'nodata(/Visiology Monitoring Template/agent.ping,35s)=1'
+                -
+                  uuid: 1299c16bef2647b1887c3b5d431002de
+                  expression: 'last(/Visiology Monitoring Template/plan.status[{#ID}],#1)=1'
+                  name: 'Plan "{#NAME}" has been started'
+                  priority: INFO
+                  dependencies:
+                    -
+                      name: 'Zabbix agent is down'
+                      expression: 'nodata(/Visiology Monitoring Template/agent.ping,35s)=1'
+      tags:
+        -
+          tag: class
+          value: software
+        -
+          tag: target
+          value: platform
+      macros:
+        -
+          macro: '{$ADMIN.PASSWORD}'
+          value: 'ПАРОЛЬ-ЗАБИКСА'
+          description: 'Zabbix admin password'
+        -
+          macro: '{$ADMIN.USER}'
+          value: 'Админ-ЗАБИКСА'
+          description: 'Zabbix admin login'
+        -
+          macro: '{$DOCKER.LLD.FILTER.CONTAINER.MATCHES}'
+          value: '.*visiology.*'
+          description: 'Filter of discoverable containers'
+        -
+          macro: '{$DOCKER.LLD.FILTER.CONTAINER.NOT_MATCHES}'
+          value: CHANGE_IF_NEEDED
+          description: 'Filter to exclude discovered containers'
+        -
+          macro: '{$DOCKER.LLD.FILTER.IMAGE.MATCHES}'
+          value: '.*cr.yandex.*'
+          description: 'Filter of discoverable images'
+        -
+          macro: '{$DOCKER.LLD.FILTER.IMAGE.NOT_MATCHES}'
+          value: CHANGE_IF_NEEDED
+          description: 'Filter to exclude discovered images'
+        -
+          macro: '{$LOG_LIST}'
+          value: '"VISIOLOGY_SMART_FORMS","VISIOLOGY_PROXY","VISIOLOGY_MONGODB","VISIOLOGY_VIQUBE_ADMIN","VISIOLOGY_VIQUBE_MASTER"'
+          description: 'Список логов в мониторинге'
+        -
+          macro: '{$PLATFORM_DATABASE}'
+          value: DB
+          description: 'Database for loadplans monitoring'
+        -
+          macro: '{$PLATFORM_PASSWORD}'
+          value: '123456'
+          description: 'Visiology admin password'
+        -
+          macro: '{$PLATFORM_USER}'
+          value: admin
+          description: 'Visiology admin user'
+        -
+          macro: '{$ZABBIX.HOST}'
+          value: 'http://192.168.44.209'
+          description: 'Zabbix hostname'
+      dashboards:
+        -
+          uuid: 194bd3470bfa43498ea160f998040718
+          name: 'Platform overview'
+          pages:
+            -
+              name: Основное
+              widgets:
+                -
+                  type: ITEM
+                  x: '12'
+                  'y': '4'
+                  width: '12'
+                  fields:
+                    -
+                      type: INTEGER
+                      name: show
+                      value: '1'
+                    -
+                      type: INTEGER
+                      name: show
+                      value: '2'
+                    -
+                      type: INTEGER
+                      name: adv_conf
+                      value: '1'
+                    -
+                      type: INTEGER
+                      name: desc_size
+                      value: '10'
+                    -
+                      type: INTEGER
+                      name: value_bold
+                      value: '0'
+                    -
+                      type: INTEGER
+                      name: units_show
+                      value: '0'
+                    -
+                      type: INTEGER
+                      name: units_bold
+                      value: '0'
+                    -
+                      type: ITEM
+                      name: itemid
+                      value:
+                        key: 'system.localtime[local]'
+                        host: 'Visiology Monitoring Template'
+                -
+                  type: GRAPH_CLASSIC
+                  'y': '5'
+                  width: '12'
+                  height: '5'
+                  fields:
+                    -
+                      type: GRAPH
+                      name: graphid
+                      value:
+                        name: Memory
+                        host: 'Visiology Monitoring Template'
+                -
+                  type: GRAPH_CLASSIC
+                  x: '18'
+                  'y': '6'
+                  width: '6'
+                  height: '4'
+                  fields:
+                    -
+                      type: GRAPH
+                      name: graphid
+                      value:
+                        name: Swap
+                        host: 'Visiology Monitoring Template'
+                -
+                  type: GRAPH_CLASSIC
+                  name: CPU
+                  width: '12'
+                  height: '5'
+                  fields:
+                    -
+                      type: GRAPH
+                      name: graphid
+                      value:
+                        name: CPU
+                        host: 'Visiology Monitoring Template'
+                -
+                  type: ITEM
+                  name: HTTPs
+                  x: '12'
+                  'y': '2'
+                  width: '2'
+                  fields:
+                    -
+                      type: INTEGER
+                      name: show
+                      value: '1'
+                    -
+                      type: INTEGER
+                      name: show
+                      value: '2'
+                    -
+                      type: INTEGER
+                      name: adv_conf
+                      value: '1'
+                    -
+                      type: INTEGER
+                      name: desc_size
+                      value: '10'
+                    -
+                      type: INTEGER
+                      name: value_bold
+                      value: '0'
+                    -
+                      type: INTEGER
+                      name: units_show
+                      value: '0'
+                    -
+                      type: INTEGER
+                      name: units_bold
+                      value: '0'
+                    -
+                      type: ITEM
+                      name: itemid
+                      value:
+                        key: 'vfs.file.contents[/docker-volume/httpsState]'
+                        host: 'Visiology Monitoring Template'
+                -
+                  type: ITEM
+                  name: OS
+                  x: '18'
+                  'y': '2'
+                  width: '6'
+                  fields:
+                    -
+                      type: INTEGER
+                      name: show
+                      value: '1'
+                    -
+                      type: INTEGER
+                      name: show
+                      value: '2'
+                    -
+                      type: INTEGER
+                      name: adv_conf
+                      value: '1'
+                    -
+                      type: INTEGER
+                      name: desc_size
+                      value: '10'
+                    -
+                      type: INTEGER
+                      name: value_bold
+                      value: '0'
+                    -
+                      type: INTEGER
+                      name: units_bold
+                      value: '0'
+                    -
+                      type: ITEM
+                      name: itemid
+                      value:
+                        key: docker.operating_system
+                        host: 'Visiology Monitoring Template'
+                -
+                  type: ITEM
+                  name: Policy
+                  x: '16'
+                  'y': '2'
+                  width: '2'
+                  fields:
+                    -
+                      type: INTEGER
+                      name: show
+                      value: '1'
+                    -
+                      type: INTEGER
+                      name: show
+                      value: '2'
+                    -
+                      type: INTEGER
+                      name: adv_conf
+                      value: '1'
+                    -
+                      type: INTEGER
+                      name: desc_size
+                      value: '10'
+                    -
+                      type: INTEGER
+                      name: value_bold
+                      value: '0'
+                    -
+                      type: INTEGER
+                      name: units_show
+                      value: '0'
+                    -
+                      type: INTEGER
+                      name: units_bold
+                      value: '0'
+                    -
+                      type: ITEM
+                      name: itemid
+                      value:
+                        key: 'vfs.file.contents[/docker-volume/policyState]'
+                        host: 'Visiology Monitoring Template'
+                -
+                  type: ITEM
+                  name: Seq
+                  x: '14'
+                  'y': '2'
+                  width: '2'
+                  fields:
+                    -
+                      type: INTEGER
+                      name: show
+                      value: '1'
+                    -
+                      type: INTEGER
+                      name: show
+                      value: '2'
+                    -
+                      type: INTEGER
+                      name: adv_conf
+                      value: '1'
+                    -
+                      type: INTEGER
+                      name: desc_size
+                      value: '10'
+                    -
+                      type: INTEGER
+                      name: value_bold
+                      value: '0'
+                    -
+                      type: INTEGER
+                      name: units_show
+                      value: '0'
+                    -
+                      type: INTEGER
+                      name: units_bold
+                      value: '0'
+                    -
+                      type: ITEM
+                      name: itemid
+                      value:
+                        key: 'vfs.file.contents[/docker-volume/seqState]'
+                        host: 'Visiology Monitoring Template'
+                -
+                  type: GRAPH_CLASSIC
+                  name: Storage
+                  x: '12'
+                  'y': '6'
+                  width: '6'
+                  height: '4'
+                  fields:
+                    -
+                      type: GRAPH
+                      name: graphid
+                      value:
+                        name: Storage
+                        host: 'Visiology Monitoring Template'
+                -
+                  type: ITEM
+                  name: URL
+                  x: '12'
+                  width: '12'
+                  fields:
+                    -
+                      type: INTEGER
+                      name: show
+                      value: '1'
+                    -
+                      type: INTEGER
+                      name: show
+                      value: '2'
+                    -
+                      type: INTEGER
+                      name: adv_conf
+                      value: '1'
+                    -
+                      type: INTEGER
+                      name: desc_size
+                      value: '10'
+                    -
+                      type: INTEGER
+                      name: value_bold
+                      value: '0'
+                    -
+                      type: INTEGER
+                      name: units_show
+                      value: '0'
+                    -
+                      type: INTEGER
+                      name: units_bold
+                      value: '0'
+                    -
+                      type: ITEM
+                      name: itemid
+                      value:
+                        key: 'vfs.file.contents[/docker-volume/ipState]'
+                        host: 'Visiology Monitoring Template'
+      valuemaps:
+        -
+          uuid: 6ba38c8607c44b3e90ae01c2ae09e507
+          name: 'Docker flag'
+          mappings:
+            -
+              value: '0'
+              newvalue: 'False'
+            -
+              value: '1'
+              newvalue: 'True'
+        -
+          uuid: d44f27c16d44469eb202adaa6f9cb6ba
+          name: 'Service state'
+          mappings:
+            -
+              value: '0'
+              newvalue: Down
+            -
+              value: '1'
+              newvalue: Up
+  triggers:
+    -
+      uuid: ddb925b9e90f4f3aae6548df8d6360d6
+      expression: 'last(/Visiology Monitoring Template/vfs.file.size[/docker-volume/viqube/snapshots/auto.snapshot],#1)*1.8+10*1024*1024*1024<=last(/Visiology Monitoring Template/vm.memory.size[total],#1)'
+      name: 'Insufficient memory'
+      priority: HIGH
+    -
+      uuid: 8af1c08a0cd44923b6649d902ff90417
+      expression: 'max(/Visiology Monitoring Template/vm.memory.utilization,20s)=0/max(/Visiology Monitoring Template/vm.memory.size[total],#1)*100<15'
+      name: 'Lack of memory <15%'
+      priority: HIGH
+  graphs:
+    -
+      uuid: ce1437d0ce9c4937b832ef1e10e77717
+      name: CPU
+      type: STACKED
+      ymin_type_1: FIXED
+      ymax_type_1: FIXED
+      graph_items:
+        -
+          color: F63100
+          item:
+            host: 'Visiology Monitoring Template'
+            key: system.cpu.util
+        -
+          sortorder: '1'
+          color: 1A7C11
+          item:
+            host: 'Visiology Monitoring Template'
+            key: 'system.cpu.util[,idle]'
+    -
+      uuid: b57a4133ba214444b212ce36be0f3b15
+      name: Memory
+      type: STACKED
+      ymax_type_1: FIXED
+      graph_items:
+        -
+          color: FF0000
+          item:
+            host: 'Visiology Monitoring Template'
+            key: vm.memory.utilization
+        -
+          sortorder: '1'
+          color: 1A7C11
+          item:
+            host: 'Visiology Monitoring Template'
+            key: 'vm.memory.size[pavailable]'
+    -
+      uuid: 8146aad5857644d89b718d8ddfe0ba22
+      name: Storage
+      yaxismax: '0'
+      show_work_period: 'NO'
+      show_triggers: 'NO'
+      type: PIE
+      show_3d: 'YES'
+      graph_items:
+        -
+          color: FF4000
+          calc_fnc: LAST
+          item:
+            host: 'Visiology Monitoring Template'
+            key: 'vfs.fs.size[/docker-volume,total]'
+        -
+          sortorder: '1'
+          color: 00FF00
+          calc_fnc: LAST
+          item:
+            host: 'Visiology Monitoring Template'
+            key: 'vfs.fs.size[/docker-volume,free]'
+    -
+      uuid: 9f328be0a80f4fc290bd98e1ae92d538
+      name: Swap
+      width: '200'
+      height: '300'
+      show_work_period: 'NO'
+      show_triggers: 'NO'
+      graph_items:
+        -
+          color: FF4000
+          item:
+            host: 'Visiology Monitoring Template'
+            key: 'system.swap.size[,pfree]'
+    -
+      uuid: a2d996ac5b274cc39a2c5506d90403d6
+      name: 'ViQube load'
+      yaxismax: '2'
+      ymin_type_1: FIXED
+      ymax_type_1: FIXED
+      graph_items:
+        -
+          color: 1A7C11
+          item:
+            host: 'Visiology Monitoring Template'
+            key: 'logrt.count[/docker-volume/viqube/log/viqube.log,".*was\ssuccessfully\sloaded.*",,10,skip]'
+    -
+      uuid: 64cbf25f2b314694ba605de1a780cf9b
+      name: 'Viqube save'
+      yaxismax: '2'
+      ymin_type_1: FIXED
+      ymax_type_1: FIXED
+      graph_items:
+        -
+          color: 80FF00
+          item:
+            host: 'Visiology Monitoring Template'
+            key: 'logrt.count[/docker-volume/viqube/log/viqube.log,".*POST\s/snapshots.*",,30,skip]'
+        -
+          sortorder: '1'
+          color: 1B5E20
+          item:
+            host: 'Visiology Monitoring Template'
+            key: 'logrt.count[/docker-volume/viqube/log/viqube.log,".*was\ssuccessfully\ssaved.*",,10,skip]'
+    -
+      uuid: 08da05ddd4814ad387fa10869f968bc9
+      name: 'ViQube Snapshot size'
+      show_triggers: 'NO'
+      graph_items:
+        -
+          color: 1A7C11
+          item:
+            host: 'Visiology Monitoring Template'
+            key: 'vfs.file.size[/docker-volume/viqube/snapshots/auto.snapshot]'
